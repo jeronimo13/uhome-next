@@ -36,7 +36,7 @@ const products = [
     // More products...
 ]
 
-export default function Example() {
+export default function Products() {
     return (
         <Layout>
             <div className="bg-white h-screen">
