@@ -69,7 +69,7 @@ export default function Example() {
 export const getStaticProps: GetStaticProps = async ({params}) => {
     const categories = await prisma.category.findMany({
         select: {
-            name: true
+            title: true
         }
     })
 
