@@ -15,7 +15,7 @@ export async function getServerSideProps(ctx) {
             price: true,
             discount: true,
             quantity: true,
-            url: true,
+            imgUrl: true,
         },
     });
 

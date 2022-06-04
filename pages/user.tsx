@@ -1,10 +1,9 @@
-import {signIn, signOut, useSession} from 'next-auth/react';
+import {getSession, signIn, signOut, useSession} from 'next-auth/react';
 import Layout from '../components/Layout';
 import TwoColumn from '../components/TwoColumn';
+import prisma from '../lib/prisma';
 
-const UserComponent = () => {
-    const {data: session} = useSession();
-
+const UserComponent = (props) => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -13,10 +12,16 @@ const UserComponent = () => {
         console.log(Object.keys(event.target));
 
         const data = {
-            email: event.target.email.value || undefined,
-            firstName: event.target.firstName.value || undefined,
-            lastName: event.target.lastName.value || undefined,
-            phoneNumber: event.target.phoneNumber.value || undefined,
+            email: event.target.email?.value || undefined,
+            firstName: event.target.firstName?.value || undefined,
+            lastName: event.target.lastName?.value || undefined,
+            phoneNumber: event.target.phoneNumber?.value || undefined,
+            address: {
+                street: event.target.street.value || undefined,
+                city: event.target.city.value || undefined,
+                region: event.target.region.value || undefined,
+                zipCode: event.target.zipCode.value || undefined,
+            },
         };
         const JSONdata = JSON.stringify(data);
         const endpoint = '/api/user';
@@ -34,15 +39,10 @@ const UserComponent = () => {
         };
 
         // Send the form data to our forms API on Vercel and get a response.
-        const response = await fetch(endpoint, options);
-
-        const json = await response.json();
-        console.log(json);
-
-        session.user.email = json.email;
+        await fetch(endpoint, options);
     };
 
-    if (session) {
+    if (props.user) {
         return (
             <>
                 <div className={'p-6'}>
@@ -74,7 +74,7 @@ const UserComponent = () => {
                                                 id="first-name"
                                                 autoComplete="given-name"
                                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                                                placeholder={session.user.firstName || 'Імʼя'}
+                                                placeholder={props.user.firstName || 'Імʼя'}
                                             />
                                         </div>
 
@@ -88,7 +88,7 @@ const UserComponent = () => {
                                                 id="last-name"
                                                 autoComplete="family-name"
                                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                                                placeholder={session.user.lastName || 'Прізвище'}
+                                                placeholder={props.user.lastName || 'Прізвище'}
                                             />
                                         </div>
 
@@ -102,7 +102,7 @@ const UserComponent = () => {
                                                 id="email"
                                                 autoComplete="email"
                                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                                                placeholder={session.user.email}
+                                                placeholder={props.user.email}
                                             />
                                         </div>
 
@@ -116,7 +116,7 @@ const UserComponent = () => {
                                                 id="phoneNumber"
                                                 autoComplete="phone"
                                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                                                placeholder={session.user.phoneNumber}
+                                                placeholder={props.user.phoneNumber}
                                             />
                                         </div>
                                     </div>
@@ -140,7 +140,7 @@ const UserComponent = () => {
                     </div>
 
                     <TwoColumn title={'Мої адреси'}>
-                        <form>
+                        <form onSubmit={handleSubmit}>
                             <div className="shadow overflow-hidden sm:rounded-md">
                                 <div className="px-4 py-5 bg-white sm:p-6">
                                     <div className="grid grid-cols-6 gap-6">
@@ -154,6 +154,7 @@ const UserComponent = () => {
                                                 id="street"
                                                 autoComplete="street-address"
                                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                                placeholder={props.user.addresses[0]?.street || 'Вулиця'}
                                             />
                                         </div>
 
@@ -167,6 +168,7 @@ const UserComponent = () => {
                                                 id="city"
                                                 autoComplete="address-level2"
                                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                                placeholder={props.user.addresses[0]?.city || 'Місто'}
                                             />
                                         </div>
 
@@ -180,19 +182,21 @@ const UserComponent = () => {
                                                 id="region"
                                                 autoComplete="address-level1"
                                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                                placeholder={props.user.addresses[0]?.region || 'Область'}
                                             />
                                         </div>
 
                                         <div className="col-span-6 sm:col-span-3 lg:col-span-2">
-                                            <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">
+                                            <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700">
                                                 Поштовий індекс
                                             </label>
                                             <input
                                                 type="text"
-                                                name="postalCode"
-                                                id="postalCode"
+                                                name="zipCode"
+                                                id="zipCode"
                                                 autoComplete="postal-code"
                                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                                placeholder={props.user.addresses[0]?.zip || 'Поштовий індекс'}
                                             />
                                         </div>
                                     </div>
@@ -227,10 +231,29 @@ const UserComponent = () => {
     );
 };
 
-export default function User() {
+export default function User(props) {
     return (
         <Layout>
-            <UserComponent />
+            <UserComponent {...props} />
         </Layout>
     );
+}
+
+export async function getServerSideProps(context) {
+    const session = await getSession(context);
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: session.user.id,
+        },
+        include: {
+            addresses: true,
+        },
+    });
+
+    return {
+        props: {
+            user,
+        },
+    };
 }

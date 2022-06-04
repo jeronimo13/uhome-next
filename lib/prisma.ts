@@ -17,6 +17,9 @@ const serializeDecimal = (object) => {
         if (Decimal.isDecimal(object[key])) {
             object[key] = object[key].toNumber();
         }
+        if (object[key] instanceof Date) {
+            object[key] = object[key].toISOString();
+        }
     });
     return object;
 };

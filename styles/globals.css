@@ -4,23 +4,113 @@
 
 html,
 body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    padding: 0;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
 html,
 body,
 #__next {
-  @apply h-full;
+    @apply h-full;
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+    color: inherit;
+    text-decoration: none;
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.q-spinner-mat {
+    -webkit-animation: q-spin 2s linear infinite;
+    animation: q-spin 2s linear infinite;
+    transform-origin: center center;
+}
+
+.q-spinner-mat .path {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    -webkit-animation: q-mat-dash 1.5s ease-in-out infinite;
+    animation: q-mat-dash 1.5s ease-in-out infinite;
+}
+
+@-webkit-keyframes q-spin {
+    0% {
+        transform: rotate3d(0, 0, 1, 0deg);
+    }
+
+    25% {
+        transform: rotate3d(0, 0, 1, 90deg);
+    }
+
+    50% {
+        transform: rotate3d(0, 0, 1, 180deg);
+    }
+
+    75% {
+        transform: rotate3d(0, 0, 1, 270deg);
+    }
+
+    to {
+        transform: rotate3d(0, 0, 1, 359deg);
+    }
+}
+
+@keyframes q-spin {
+    0% {
+        transform: rotate3d(0, 0, 1, 0deg);
+    }
+
+    25% {
+        transform: rotate3d(0, 0, 1, 90deg);
+    }
+
+    50% {
+        transform: rotate3d(0, 0, 1, 180deg);
+    }
+
+    75% {
+        transform: rotate3d(0, 0, 1, 270deg);
+    }
+
+    to {
+        transform: rotate3d(0, 0, 1, 359deg);
+    }
+}
+
+@-webkit-keyframes q-mat-dash {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -35px;
+    }
+
+    to {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -124px;
+    }
+}
+
+@keyframes q-mat-dash {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -35px;
+    }
+
+    to {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -124px;
+    }
 }

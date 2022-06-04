@@ -80,12 +80,12 @@ model Cart {
   userId      String     @unique
   //sessionId
   token       String     @unique @default(cuid())
-  status      CartStatus
+  status      CartStatus @default(NEW)
   firstName   String?
   lastName    String?
   email       String?
   phoneNumber String?
-  address     String?
+  street      String?
   city        String?
   region      String?
   zipCode     String?
@@ -94,8 +94,8 @@ model Cart {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  CartItem CartItem[]
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
 }
 
 model CartItem {
@@ -170,17 +170,18 @@ model Order {
 }
 
 model Address {
-  id     String @id @default(cuid())
-  userId String
-  street String
-  city   String
-  region String
-  zip    String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  userId  String
+  street  String
+  city    String
+  region  String
+  zipCode String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Product {
   id           String              @id @default(cuid())
+  code         Int                 @unique @default(autoincrement())
   title        String
   metaTitle    String
   slug         String
@@ -190,7 +191,7 @@ model Product {
   price        Decimal
   discount     Decimal             @default(0)
   quantity     Int
-  url          String
+  imgUrl       String
   categories   CategoryOnProduct[]
   TagOnProduct TagOnProduct[]
   CartItem     CartItem[]

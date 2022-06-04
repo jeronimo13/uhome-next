@@ -33,7 +33,7 @@ async function main() {
                     SKU: `SKU ${i}`,
                     price: i * 100,
                     quantity: i * 10,
-                    url: `jars/jars_${i}.jpg`,
+                    imgUrl: `jars/jars_${i}.jpg`,
                 },
             })
         );
@@ -43,8 +43,8 @@ async function main() {
             data: {
                 productId: product.id,
                 categoryId: child.id,
-            }
-        })
+            },
+        });
     }
 }
 

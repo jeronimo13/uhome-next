@@ -53,7 +53,7 @@ export async function getServerSideProps(ctx) {
                     price: true,
                     discount: true,
                     quantity: true,
-                    url: true,
+                    imgUrl: true,
                 },
             });
 
@@ -80,7 +80,7 @@ export async function getServerSideProps(ctx) {
         select: {
             title: true,
             price: true,
-            url: true,
+            imgUrl: true,
             summary: true,
             description: true,
             categories: {
@@ -117,7 +117,7 @@ export async function getServerSideProps(ctx) {
                 breadcrumbs: breadcrumbs.map((el, index) => ({...el, id: index + 1})),
                 images: [
                     {
-                        src: product.url,
+                        src: product.imgUrl,
                         alt: 'Two each of gray, white, and black shirts laying flat.',
                     },
                 ],
