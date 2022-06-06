@@ -61,6 +61,7 @@ export async function getServerSideProps(ctx) {
                 props: {
                     isCategory: true,
                     isParent: false,
+                    category,
                     products,
                 },
             };
@@ -101,6 +102,15 @@ export async function getServerSideProps(ctx) {
             },
         },
     });
+
+    if (!product) {
+        return {
+            redirect: {
+                destination: '/products?error=404',
+                permanent: false,
+            },
+        };
+    }
 
     const breadcrumbs = [];
     for (const el of product.categories) {

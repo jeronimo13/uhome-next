@@ -1,7 +1,8 @@
 import Layout from './Layout';
 import {ShoppingCartIcon, CheckIcon} from '@heroicons/react/outline';
-import {useState} from 'react';
+import React, {useState} from 'react';
 import {useRouter} from 'next/router';
+import {Store} from 'react-notifications-component';
 
 enum CartStatus {
     OPEN,
@@ -11,14 +12,31 @@ enum CartStatus {
 
 const Product = ({product}) => {
     const router = useRouter();
-    const [cartState, setState] = useState<CartStatus>(CartStatus.OPEN);
+    const [cartState, setState] = useState<CartStatus>(product.inCart ? CartStatus.BOUGHT : CartStatus.OPEN);
 
     const addToCart = async (product) => {
         if (cartState === CartStatus.OPEN) {
             setState(CartStatus.LOADING);
-            setTimeout(() => {
-                setState(CartStatus.BOUGHT);
-            }, 1000);
+
+            await fetch('/api/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId: product.id,
+                }),
+            });
+            Store.addNotification({
+                title: 'Товар додано в кошик',
+                message: <a href={'/checkout'}>Оформити замовлення</a>,
+                type: 'success',
+                container: 'bottom-center',
+                dismiss: {
+                    duration: 3000,
+                },
+            });
+            setState(CartStatus.BOUGHT);
         }
         if (cartState === CartStatus.BOUGHT) {
             await router.push('/checkout');
@@ -72,7 +90,12 @@ export default function Products(props) {
         <Layout>
             <div className="bg-white">
                 <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
-                    <h2 className="sr-only">Products</h2>
+                    {props.error === '404' && (
+                        <div className={'flex justify-center'}>
+                            <h2 className="text-xl  text-gray-900"> Товар не знайдено.</h2>
+                        </div>
+                    )}
+                    <h2 className="text-4xl font-extrabold text-gray-900">{props.category ? props.category.title : 'Усі товари'}</h2>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ">
                         {props.products.map((product) => (

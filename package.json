@@ -19,7 +19,9 @@
     "next-auth": "^4.3.4",
     "rambda": "^7.1.4",
     "react": "18.1.0",
-    "react-dom": "18.1.0"
+    "react-dom": "18.1.0",
+    "react-notifications-component": "^4.0.1",
+    "react-query": "^3.39.1"
   },
   "devDependencies": {
     "@heroicons/react": "^1.0.6",

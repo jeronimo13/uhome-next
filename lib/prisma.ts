@@ -12,15 +12,26 @@ if (process.env.NODE_ENV === 'production') {
     prisma = global.prisma;
 }
 
-const serializeDecimal = (object) => {
-    Object.keys(object).forEach((key) => {
-        if (Decimal.isDecimal(object[key])) {
-            object[key] = object[key].toNumber();
-        }
-        if (object[key] instanceof Date) {
-            object[key] = object[key].toISOString();
-        }
-    });
+const serializeObjectValuesDecimalAndDateRecursively = (object) => {
+    if (!object) {
+        return object;
+    }
+    if (object instanceof Decimal) {
+        return object.toString();
+    }
+    if (object instanceof Date) {
+        return object.toISOString();
+    }
+    if (Array.isArray(object)) {
+        return object.map((value) => serializeObjectValuesDecimalAndDateRecursively(value));
+    }
+    if (typeof object === 'object') {
+        return Object.entries(object).reduce((acc, [key, value]) => {
+            acc[key] = serializeObjectValuesDecimalAndDateRecursively(value);
+            return acc;
+        }, {});
+    }
+
     return object;
 };
 
@@ -29,15 +40,8 @@ prisma.$use(async (params, next) => {
 
     if (!result) return result;
 
-    if (result instanceof Array) {
-        result.forEach((item) => {
-            serializeDecimal(item);
-        });
-    } else {
-        result = serializeDecimal(result);
-    }
-
-    return result;
+    const serialized = serializeObjectValuesDecimalAndDateRecursively(result);
+    return serialized;
 });
 
 export default prisma;
