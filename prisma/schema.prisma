@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -64,15 +65,7 @@ model User {
   cart          Cart?
 
   @@map(name: "users")
-}
-
-enum CartStatus {
-  NEW
-  CART
-  CHECKOUT
-  PAID
-  COMPLETE
-  ABANDONED
+  Transaction Transaction[]
 }
 
 model Cart {
@@ -80,7 +73,6 @@ model Cart {
   userId      String     @unique
   //sessionId
   token       String     @unique @default(cuid())
-  status      CartStatus @default(NEW)
   firstName   String?
   lastName    String?
   email       String?
@@ -142,31 +134,68 @@ enum OrderStatus {
 }
 
 model Order {
-  id            String      @id @default(cuid())
+  id            String        @id @default(cuid())
   userId        String?
-  user          User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   // sessionId
-  token         String      @unique @default(cuid())
-  status        OrderStatus @default(NEW)
+  token         String        @unique @default(cuid())
+  status        OrderStatus   @default(NEW)
   subtotal      Decimal
-  itemsDiscount Decimal     @default(0)
-  tax           Decimal     @default(0)
-  shipping      Decimal     @default(0)
+  itemsDiscount Decimal       @default(0)
+  tax           Decimal       @default(0)
+  shipping      Decimal       @default(0)
   total         Decimal
   promoCode     String?
-  discount      Decimal     @default(0)
+  discount      Decimal       @default(0)
   grandTotal    Decimal
   firstName     String
   lastName      String
   email         String
-  mobile        String
-  address       String
+  phoneNumber   String
+  street        String
   city          String
   region        String
   zipCode       String
-  createdAt     DateTime    @default(now()) @map(name: "created_at")
-  updatedAt     DateTime    @updatedAt @map(name: "updated_at")
+  createdAt     DateTime      @default(now()) @map(name: "created_at")
+  updatedAt     DateTime      @updatedAt @map(name: "updated_at")
   items         OrderItem[]
+  transactions   Transaction[]
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TranscationMode {
+  OFFLINE
+  CASH_ON_DELIVERY
+  WIRE_TRANSFER
+  WIRE_CARD
+  ONLINE
+}
+
+enum TransactionStatus {
+  NEW
+  PENDING // user started payment but not completed
+  CANCELLED // cancelled by user
+  FAILED // failed by payment gateway
+  REJECTED // rejected by payment gateway
+  SUCCESS
+}
+
+model Transaction {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId   String
+  order     Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  code      String
+  type      TransactionType   @default(DEBIT)
+  mode      TranscationMode
+  status    TransactionStatus @default(NEW)
+  createdAt DateTime          @default(now()) @map(name: "created_at")
+  updatedAt DateTime          @updatedAt @map(name: "updated_at")
 }
 
 model Address {
