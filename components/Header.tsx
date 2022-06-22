@@ -1,9 +1,10 @@
 import {Disclosure, Menu, Transition} from '@headlessui/react';
-import {BellIcon, MenuIcon, UserCircleIcon, XIcon} from '@heroicons/react/outline';
-import {Fragment} from 'react';
+import {ShoppingCartIcon, MenuIcon, UserCircleIcon, XIcon} from '@heroicons/react/outline';
+import {Fragment, useEffect} from 'react';
 import {useRouter} from 'next/router';
 import {signIn, signOut, useSession} from 'next-auth/react';
-
+import {useQuery} from 'react-query';
+import * as R from 'rambda';
 const navigation = [
     {name: 'Головна', href: '/', current: false},
     {name: 'Всі товари', href: '/products', current: false},
@@ -18,7 +19,33 @@ function classNames(...classes) {
 export default function Header() {
     const {pathname} = useRouter();
 
-    const {data: session} = useSession();
+    const {status, data: session} = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            signIn('anon', {redirect: false}).then((response) => {
+                console.log(response);
+                if (response.ok) {
+                    // anonymous login complete
+                    //  - status will be 'authenticated'
+                    //  - data.isLoggedIn will be true
+                    console.log('logg IN');
+                } else {
+                    // anonymous login failed, check response.error and display an error
+                    console.log('fail');
+                }
+            });
+        }
+    }, [status]);
+
+    const results = useQuery('cart', () => {
+        return fetch('/api/cart').then((res) => res.json());
+    });
+
+    if (status === 'loading') {
+        return '...';
+    }
 
     return (
         <Disclosure as="nav" className="bg-gray-800">
@@ -57,25 +84,37 @@ export default function Header() {
                                 </div>
                             </div>
                             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                                <button
-                                    type="button"
-                                    className="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-                                >
-                                    <span className="sr-only">View notifications</span>
-                                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                                </button>
+                                <div className={'relative mr-2'}>
+                                    <button
+                                        type="button"
+                                        className="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+                                        onClick={async () => {
+                                            await router.push('/checkout');
+                                        }}
+                                    >
+                                        <span className="sr-only">View notifications</span>
+                                        <ShoppingCartIcon className="h-6 w-6" aria-hidden="true" />
+                                        {results.isLoading
+                                            ? '...'
+                                            : results.data.cart.items.length > 0 && (
+                                                  <div className={'text-black text-sm  absolute bottom-5 left-6 bg-white w-5 h-5 rounded-full'}>
+                                                      {R.sum(results.data.cart.items.map((i) => i.quantity))}
+                                                  </div>
+                                              )}
+                                    </button>
+                                </div>
 
                                 {/* Profile dropdown */}
                                 <Menu as="div" className="ml-3 relative">
                                     <div>
-                                        {session && (
+                                        {session?.user?.email && (
                                             <Menu.Button className="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                                                 <span className="sr-only">Open user menu</span>
                                                 <UserCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />
                                             </Menu.Button>
                                         )}
 
-                                        {!session && (
+                                        {!session?.user?.email && (
                                             <div className="text-base text-white">
                                                 {' '}
                                                 <button onClick={() => signIn()}>Увійти</button>

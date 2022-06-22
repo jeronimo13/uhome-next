@@ -74,7 +74,16 @@ const Quantity = (props) => {
             <div className={'text-md font-medium border w-10 h-10 flex justify-center items-center rounded mx-2'}>{quantity}</div>
             <div
                 className={'border w-5 h-5 flex font-medium justify-center items-center rounded-full cursor-pointer'}
-                onClick={() => {
+                onClick={async () => {
+                    await fetch('/api/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            productId: props.productId,
+                        }),
+                    });
                     setQuantity(quantity + 1);
                 }}
             >
@@ -109,7 +118,7 @@ const Order = ({order, index}: {order: Order; index: number}) => {
                     <div className={'text-xs font-light text-slate-400'}>Код: {order.product.code}</div>
                 </div>
                 <div className={'mt-2 lg:mt-0 flex flex-initial w-full md:max-w-xs justify-between items-center'}>
-                    <Quantity quantity={order.quantity} />
+                    <Quantity quantity={order.quantity} productId={order.product.id} />
                     <div className={'mx-2'}>
                         <div className={'text-lg font-medium whitespace-nowrap'}>{formatPriceWithSpaces(order.price * order.quantity)}₴</div>
                     </div>
@@ -145,7 +154,7 @@ const Orders = ({orders}) => {
                     <span className={'text-xl'}>Ваше замовлення</span>
                     <div className={`flex flex-wrap`}>
                         {orders.map((order, index) => (
-                            <div className={'flex-none m-2'}>
+                            <div key={index} className={'flex-none m-2'}>
                                 <img src={order.product.imgUrl} className="rounded w-16 h-16 object-cover" alt={order.product.title} />
                             </div>
                         ))}

@@ -3,6 +3,7 @@ import {ShoppingCartIcon, CheckIcon} from '@heroicons/react/outline';
 import React, {useState} from 'react';
 import {useRouter} from 'next/router';
 import {Store} from 'react-notifications-component';
+import {useQueryClient} from 'react-query';
 
 enum CartStatus {
     OPEN,
@@ -13,6 +14,7 @@ enum CartStatus {
 const Product = ({product}) => {
     const router = useRouter();
     const [cartState, setState] = useState<CartStatus>(product.inCart ? CartStatus.BOUGHT : CartStatus.OPEN);
+    const queryClient = useQueryClient();
 
     const addToCart = async (product) => {
         if (cartState === CartStatus.OPEN) {
@@ -27,6 +29,8 @@ const Product = ({product}) => {
                     productId: product.id,
                 }),
             });
+
+            await queryClient.invalidateQueries(['cart']);
             Store.addNotification({
                 title: 'Товар додано в кошик',
                 message: <a href={'/checkout'}>Оформити замовлення</a>,

@@ -16,7 +16,7 @@ export async function getServerSideProps(ctx) {
                  left join "CartItem" CI
                            on p.id = CI."productId"
                  left join "Cart" C on CI."cartId" = C.id
-                 left join users u on C."userId" = u.id and u.id = ${session.user.id}    
+                 left join users u on C."userId" = u.id and u.id = ${session?.user?.id}    
                  order by p.id desc
                  `;
 

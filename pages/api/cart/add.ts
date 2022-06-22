@@ -22,7 +22,7 @@ export default async function handler(req, res) {
         },
     });
 
-    const item = user.cart.items.find((item) => item.product.id === productId);
+    const item = user.cart?.items?.find((item) => item.product.id === productId);
     if (item) {
         await prisma.cartItem.update({
             where: {

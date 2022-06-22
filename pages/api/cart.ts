@@ -11,7 +11,12 @@ export async function getCart({userId}) {
         },
     });
 
-    const address = user.addresses[0];
+    const address = user.addresses[0] || {
+        street: '',
+        city: '',
+        region: '',
+        zipCode: '',
+    };
 
     return await prisma.cart.upsert({
         create: {
@@ -44,9 +49,9 @@ export async function getCart({userId}) {
 }
 
 export default async function handler(req, res) {
-    const {user: userSession} = await getSession({req});
+    const session = await getSession({req});
 
-    const cart = await getCart({userId: userSession.id});
+    const cart = await getCart({userId: session.user.id});
 
     res.status(200).json({cart});
 }

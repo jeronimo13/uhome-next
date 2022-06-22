@@ -2,6 +2,22 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import {PrismaAdapter} from '@next-auth/prisma-adapter';
 import prisma from '../../../lib/prisma';
+import CredentialsProvider from 'next-auth/providers/credentials';
+
+const createAnonymousUser = async () => {
+    return await prisma.user.upsert({
+        create: {
+            id: '1',
+            cart: {
+                create: {},
+            },
+        },
+        update: {},
+        where: {
+            id: '1',
+        },
+    });
+};
 
 export default NextAuth({
     adapter: PrismaAdapter(prisma),
@@ -15,8 +31,21 @@ export default NextAuth({
         // Use it to limit write operations. Set to 0 to always update the database.
         // Note: This option is ignored if using JSON Web Tokens
         updateAge: 24 * 60 * 60, // 24 hours
+        // isLoggedIn: token.sub !== undefined,
     },
     providers: [
+        CredentialsProvider({
+            id: 'anon',
+            name: 'Anonymous',
+            credentials: {},
+            async authorize() {
+                // createAnonymousUser is a function returning the id of the new persistent session
+                const {id} = await createAnonymousUser();
+                return {
+                    id,
+                };
+            },
+        }),
         GoogleProvider({
             clientId: process.env.GOOGLE_AUTH_CLIENT_ID,
             clientSecret: process.env.GOOGLE_AUTH_CLIENT_SECRET,
@@ -34,6 +63,9 @@ export default NextAuth({
     },
     callbacks: {
         async signIn({user, account, profile, email, credentials}) {
+            if (account.provider === 'anon') {
+                return true;
+            }
             if (!user.firstName) {
                 const [firstName, lastName] = user.name.trim().split(' ');
 
@@ -50,6 +82,26 @@ export default NextAuth({
         },
 
         async session({session, user, token}) {
+            if (!session.user.email) {
+                // anon user
+                const userData = await prisma.user.findUnique({
+                    where: {id: token.sub},
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        phoneNumber: true,
+                    },
+                });
+                return {
+                    ...session,
+                    isLoggedIn: token.sub !== undefined,
+                    user: {
+                        ...session.user,
+                        ...userData,
+                    },
+                };
+            }
             const userData = await prisma.user.findUnique({
                 where: {email: session.user.email},
                 select: {
