@@ -1,5 +1,6 @@
 import Layout from './Layout';
 import {StarIcon} from '@heroicons/react/solid';
+import {addToCart} from '../mutations/cart';
 const reviews = {href: '#', average: 0, totalCount: 0};
 
 function classNames(...classes) {
@@ -91,14 +92,14 @@ export default function Product(props) {
                                 </div>
                             </div>
 
-                            <form className="mt-10">
-                                <button
-                                    type="submit"
-                                    className="mt-10 w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                >
-                                    Додати в корзину
-                                </button>
-                            </form>
+                            <button
+                                className="mt-10 w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                onClick={async () => {
+                                    await addToCart({productId: productSlug.id});
+                                }}
+                            >
+                                Додати в корзину
+                            </button>
                         </div>
 
                         <div className="py-10 lg:pt-6 lg:pb-16 lg:col-start-1 lg:col-span-2 lg:border-r lg:border-gray-200 lg:pr-8">

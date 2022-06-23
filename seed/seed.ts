@@ -1,22 +1,30 @@
 import prisma from '../lib/prisma';
 
 async function main() {
-    const parent = await prisma.category.create({
-        data: {
+    const parent = await prisma.category.upsert({
+        create: {
             title: 'Кухня',
             metaTitle: 'Товари для кухні',
             slug: 'tovary-dlya-kuhni',
             imgUrl: 'kitchen.jpg',
         },
+        update: {},
+        where: {
+            slug: 'tovary-dlya-kuhni',
+        },
     });
 
-    const child = await prisma.category.create({
-        data: {
+    const child = await prisma.category.upsert({
+        create: {
             parentCategoryId: parent.id,
             title: 'Баночки',
             metaTitle: 'Баночки',
             slug: 'banochki',
             imgUrl: 'jars/jars.jpg',
+        },
+        update: {},
+        where: {
+            slug: 'banochki',
         },
     });
 
@@ -25,7 +33,7 @@ async function main() {
         products.push(
             await prisma.product.create({
                 data: {
-                    title: `Баночка ${i}`,
+                    title: `Баночка красива прозора для зберігання спецій та сортування побутової хімії ${i}`,
                     metaTitle: `Баночка ${i}`,
                     slug: `banochka-${i}`,
                     summary: `Тако собі баночка ${i}`,

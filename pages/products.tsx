@@ -11,7 +11,7 @@ export async function getServerSideProps(ctx) {
     const session = await getSession(ctx);
     const {error} = ctx.query;
     const products = await prisma.$queryRaw`
-        select p.id, p.title, p.slug, p.summary,p.price, p.discount, p."imgUrl", case when u.id is not null then true else false end as "inCart"
+        select p.id, p.title, p.slug, p.summary,p.price, p.discount, p."imgUrl", p.quantity, case when u.id is not null then true else false end as "inCart"
         from "Product" p
                  left join "CartItem" CI
                            on p.id = CI."productId"

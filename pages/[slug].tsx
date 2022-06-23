@@ -79,6 +79,7 @@ export async function getServerSideProps(ctx) {
     const product = await prisma.product.findFirst({
         where: {slug},
         select: {
+            id: true,
             title: true,
             price: true,
             imgUrl: true,

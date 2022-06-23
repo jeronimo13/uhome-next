@@ -49,7 +49,7 @@ export default function Header() {
         return '...';
     }
 
-    if (results.data.cart.items.length === 0 && showModal) {
+    if (results.data?.cart.items.length === 0 && showModal) {
         setShowModal(false);
     }
 

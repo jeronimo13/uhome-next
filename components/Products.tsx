@@ -2,7 +2,6 @@ import Layout from './Layout';
 import {ShoppingCartIcon, CheckIcon} from '@heroicons/react/outline';
 import React, {useState} from 'react';
 import {useRouter} from 'next/router';
-import {Store} from 'react-notifications-component';
 import {addToCart} from '../mutations/cart';
 
 enum CartStatus {
@@ -21,15 +20,6 @@ const Product = ({product}) => {
 
             await addToCart({productId: product.id});
 
-            Store.addNotification({
-                title: 'Товар додано в кошик',
-                message: <a href={'/checkout'}>Оформити замовлення</a>,
-                type: 'success',
-                container: 'bottom-center',
-                dismiss: {
-                    duration: 3000,
-                },
-            });
             setState(CartStatus.BOUGHT);
         }
         if (cartState === CartStatus.BOUGHT) {
@@ -64,7 +54,7 @@ const Product = ({product}) => {
                 </a>
 
                 <div className={'flex mt-4 justify-between p-2'}>
-                    <div>
+                    <div className={'pr-2'}>
                         <h3 className="text-sm text-gray-700">{product.title}</h3>
                         <p className="mt-1 text-lg font-medium text-gray-900">{product.price}₴</p>
                     </div>
@@ -73,6 +63,17 @@ const Product = ({product}) => {
                             {renderCart(cartState)}
                         </div>
                     </div>
+                </div>
+                <div className={'flex pl-2 justify-start w-full'}>
+                    {product.quantity > 0 ? (
+                        product.quantity < 3 ? (
+                            <span className={'text-green-500 text-sm font-light'}>Товар закінчується</span>
+                        ) : (
+                            <span className={'text-green-500 text-sm font-light'}>Є в наявності</span>
+                        )
+                    ) : (
+                        <span className={'text-gray-500 text-sm font-light'}>Немає в наявності</span>
+                    )}
                 </div>
             </div>
         </div>
@@ -83,7 +84,7 @@ export default function Products(props) {
     return (
         <Layout>
             <div className="bg-white">
-                <div className="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
+                <div className="mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
                     {props.error === '404' && (
                         <div className={'flex justify-center'}>
                             <h2 className="text-xl  text-gray-900"> Товар не знайдено.</h2>
@@ -91,7 +92,7 @@ export default function Products(props) {
                     )}
                     <h2 className="text-4xl font-extrabold text-gray-900">{props.category ? props.category.title : 'Усі товари'}</h2>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 ">
                         {props.products.map((product) => (
                             <Product key={product.id} product={product} />
                         ))}
