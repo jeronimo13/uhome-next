@@ -3,7 +3,7 @@ import {ShoppingCartIcon, CheckIcon} from '@heroicons/react/outline';
 import React, {useState} from 'react';
 import {useRouter} from 'next/router';
 import {Store} from 'react-notifications-component';
-import {useQueryClient} from 'react-query';
+import {addToCart} from '../mutations/cart';
 
 enum CartStatus {
     OPEN,
@@ -14,23 +14,13 @@ enum CartStatus {
 const Product = ({product}) => {
     const router = useRouter();
     const [cartState, setState] = useState<CartStatus>(product.inCart ? CartStatus.BOUGHT : CartStatus.OPEN);
-    const queryClient = useQueryClient();
 
-    const addToCart = async (product) => {
+    const add = async (product) => {
         if (cartState === CartStatus.OPEN) {
             setState(CartStatus.LOADING);
 
-            await fetch('/api/cart/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    productId: product.id,
-                }),
-            });
+            await addToCart({productId: product.id});
 
-            await queryClient.invalidateQueries(['cart']);
             Store.addNotification({
                 title: 'Товар додано в кошик',
                 message: <a href={'/checkout'}>Оформити замовлення</a>,
@@ -79,7 +69,7 @@ const Product = ({product}) => {
                         <p className="mt-1 text-lg font-medium text-gray-900">{product.price}₴</p>
                     </div>
                     <div>
-                        <div className={'bg-indigo-600 text-white p-3 hover:bg-indigo-500 rounded cursor-pointer'} onClick={() => addToCart(product)}>
+                        <div className={'bg-indigo-600 text-white p-3 hover:bg-indigo-500 rounded cursor-pointer'} onClick={() => add(product)}>
                             {renderCart(cartState)}
                         </div>
                     </div>

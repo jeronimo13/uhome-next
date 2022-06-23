@@ -2,9 +2,8 @@ import '../styles/globals.css';
 import {SessionProvider} from 'next-auth/react';
 import {ReactNotifications} from 'react-notifications-component';
 import 'react-notifications-component/dist/theme.css';
-import {QueryClient, QueryClientProvider} from 'react-query';
-
-const queryClient = new QueryClient();
+import {QueryClientProvider} from 'react-query';
+import queryClient from '../mutations/queryClient';
 
 function MyApp({Component, pageProps: {session, ...pageProps}}) {
     return (

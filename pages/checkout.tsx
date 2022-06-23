@@ -1,8 +1,9 @@
-import {ArrowLeftIcon, TrashIcon} from '@heroicons/react/outline';
+import {ArrowLeftIcon} from '@heroicons/react/outline';
 import {useState} from 'react';
-import {useMutation, useQuery, useQueryClient} from 'react-query';
+import {useMutation, useQuery} from 'react-query';
 import {useRouter} from 'next/router';
 import {formatPriceWithSpaces, pluralizeItems} from '../utils/utils';
+import CartItem from '../components/CartItem';
 
 const Bubble = (props) => {
     return <div className={`${props.color} rounded-xl p-5 mt-5`}>{props.children}</div>;
@@ -41,101 +42,6 @@ const Expandable = (props: IExpandable & any) => {
     );
 };
 
-interface Order {
-    id: number;
-    price: number;
-    discount: number;
-    quantity: number;
-    product: {
-        id: string;
-        code: number;
-        title: string;
-        metaTitle: string;
-        slug: string;
-        summary: string;
-        description: string;
-        imgUrl: string;
-        discount: number;
-    };
-}
-
-const Quantity = (props) => {
-    const [quantity, setQuantity] = useState(props.quantity);
-    return (
-        <div className={'flex items-center'}>
-            <div
-                className={'border w-5 h-5 font-medium justify-center items-center flex rounded-full cursor-pointer'}
-                onClick={async () => {
-                    setQuantity(quantity - 1);
-                }}
-            >
-                -
-            </div>
-            <div className={'text-md font-medium border w-10 h-10 flex justify-center items-center rounded mx-2'}>{quantity}</div>
-            <div
-                className={'border w-5 h-5 flex font-medium justify-center items-center rounded-full cursor-pointer'}
-                onClick={async () => {
-                    await fetch('/api/cart/add', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            productId: props.productId,
-                        }),
-                    });
-                    setQuantity(quantity + 1);
-                }}
-            >
-                +
-            </div>
-        </div>
-    );
-};
-
-const Order = ({order, index}: {order: Order; index: number}) => {
-    const queryClient = useQueryClient();
-
-    const deleteOrder = useMutation<{}, {}, {id: number}>(
-        (args) =>
-            fetch(`/api/cart/item/${args.id}`, {
-                method: 'DELETE',
-            }),
-        {
-            onSuccess: () => {
-                return queryClient.invalidateQueries('cart');
-            },
-        }
-    );
-    return (
-        <div className={`py-5 mx-2 flex items-center ${index > 0 && `border-t-2`}`}>
-            <div className={'w-32 flex-none'}>
-                <img src={order.product.imgUrl} className="rounded w-32 h-32 object-cover" alt={order.product.title} />
-            </div>
-            <div className={'pl-5 lg:flex flex-1 items-center justify-between'}>
-                <div className={'min-w-fit pr-5'}>
-                    <div className={'text-lg font-light'}>{order.product.title}</div>
-                    <div className={'text-xs font-light text-slate-400'}>Код: {order.product.code}</div>
-                </div>
-                <div className={'mt-2 lg:mt-0 flex flex-initial w-full md:max-w-xs justify-between items-center'}>
-                    <Quantity quantity={order.quantity} productId={order.product.id} />
-                    <div className={'mx-2'}>
-                        <div className={'text-lg font-medium whitespace-nowrap'}>{formatPriceWithSpaces(order.price * order.quantity)}₴</div>
-                    </div>
-                    <div>
-                        <TrashIcon
-                            className={'text-slate-400 w-5 h-5 cursor-pointer hover:text-red-500'}
-                            onClick={async () => {
-                                deleteOrder.mutate({id: order.id});
-                            }}
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const Orders = ({orders}) => {
     return (
         <Expandable
@@ -144,7 +50,7 @@ const Orders = ({orders}) => {
                     <span className={'text-xl'}>Ваше замовлення</span>
                     <div className={'w-full'}>
                         {orders.map((order, index) => (
-                            <Order key={order.id} order={order} index={index} />
+                            <CartItem key={order.id} order={order} index={index} />
                         ))}
                     </div>
                 </div>
@@ -196,7 +102,6 @@ export default function Checkout() {
     }
 
     const {cart} = results.data;
-    console.log(cart);
 
     return (
         <div className={'bg-gray-100'}>

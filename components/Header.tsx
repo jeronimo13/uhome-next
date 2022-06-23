@@ -1,10 +1,11 @@
 import {Disclosure, Menu, Transition} from '@headlessui/react';
 import {ShoppingCartIcon, MenuIcon, UserCircleIcon, XIcon} from '@heroicons/react/outline';
-import {Fragment, useEffect} from 'react';
+import {Fragment, useEffect, useState} from 'react';
 import {useRouter} from 'next/router';
 import {signIn, signOut, useSession} from 'next-auth/react';
 import {useQuery} from 'react-query';
 import * as R from 'rambda';
+import CartModal from './CartModal';
 const navigation = [
     {name: 'Головна', href: '/', current: false},
     {name: 'Всі товари', href: '/products', current: false},
@@ -20,7 +21,6 @@ export default function Header() {
     const {pathname} = useRouter();
 
     const {status, data: session} = useSession();
-    const router = useRouter();
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -43,14 +43,27 @@ export default function Header() {
         return fetch('/api/cart').then((res) => res.json());
     });
 
+    const [showModal, setShowModal] = useState(false);
+
     if (status === 'loading') {
         return '...';
+    }
+
+    if (results.data.cart.items.length === 0 && showModal) {
+        setShowModal(false);
     }
 
     return (
         <Disclosure as="nav" className="bg-gray-800">
             {({open}) => (
                 <>
+                    {showModal && (
+                        <CartModal
+                            setShowModal={(val) => {
+                                setShowModal(val);
+                            }}
+                        />
+                    )}
                     <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
                         <div className="relative flex items-center justify-between h-16">
                             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -88,9 +101,10 @@ export default function Header() {
                                     <button
                                         type="button"
                                         className="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-                                        onClick={async () => {
-                                            await router.push('/checkout');
+                                        onClick={() => {
+                                            setShowModal(true);
                                         }}
+                                        data-modal-toggle="medium-modal"
                                     >
                                         <span className="sr-only">View notifications</span>
                                         <ShoppingCartIcon className="h-6 w-6" aria-hidden="true" />
