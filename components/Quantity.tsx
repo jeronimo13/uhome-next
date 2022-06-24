@@ -6,16 +6,21 @@ const Quantity = (props) => {
     return (
         <div className={'flex items-center'}>
             <div
-                className={'border w-5 h-5 font-medium justify-center items-center flex rounded-full cursor-pointer'}
+                className={`border w-6 h-6 text-lg font-light justify-center items-center flex rounded-full 
+                ${quantity > 1 && 'cursor-pointer'}
+                ${quantity === 1 && 'text-gray-300'}
+                `}
                 onClick={async () => {
-                    setQuantity(quantity - 1);
+                    if (quantity > 1) {
+                        setQuantity(quantity - 1);
+                    }
                 }}
             >
-                -
+                –
             </div>
-            <div className={'text-md font-medium border w-10 h-10 flex justify-center items-center rounded mx-2'}>{quantity}</div>
+            <div className={'text-md font-light text-lg border w-10 h-10 flex justify-center items-center rounded mx-2'}>{quantity}</div>
             <div
-                className={'border w-5 h-5 flex font-medium justify-center items-center rounded-full cursor-pointer'}
+                className={'border w-6 h-6 flex text-xl font-light justify-center items-center rounded-full cursor-pointer'}
                 onClick={async () => {
                     await addToCart({productId: props.productId});
                     setQuantity(quantity + 1);
