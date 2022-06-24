@@ -1,6 +1,6 @@
 import prisma from '../lib/prisma';
-import Product from '../components/Product';
-import Products from '../components/Products';
+import ProductDetails from '../components/ProductDetails';
+import ProductList from '../components/list/ProductList';
 import Categories from '../components/Categories';
 
 export default function Slug(props) {
@@ -8,10 +8,10 @@ export default function Slug(props) {
         if (props.isParent) {
             return <Categories {...props} />;
         } else {
-            return <Products {...props} />;
+            return <ProductList {...props} />;
         }
     } else {
-        return <Product {...props} />;
+        return <ProductDetails {...props} />;
     }
 }
 

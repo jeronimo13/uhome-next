@@ -1,8 +1,7 @@
-import Layout from './Layout';
-import {ShoppingCartIcon, CheckIcon} from '@heroicons/react/outline';
-import React, {useState} from 'react';
 import {useRouter} from 'next/router';
-import {addToCart} from '../mutations/cart';
+import {useEffect, useState} from 'react';
+import {addToCart} from '../../mutations/cart';
+import {CheckIcon, ShoppingCartIcon} from '@heroicons/react/outline';
 
 enum CartStatus {
     OPEN,
@@ -10,8 +9,7 @@ enum CartStatus {
     LOADING,
     BOUGHT,
 }
-
-const Product = ({product}) => {
+export default function Product({product}) {
     const router = useRouter();
     let initialState = CartStatus.OPEN;
 
@@ -19,6 +17,10 @@ const Product = ({product}) => {
     if (product.inCart) initialState = CartStatus.BOUGHT;
 
     const [cartState, setState] = useState<CartStatus>(initialState);
+
+    useEffect(() => {
+        setState(initialState);
+    }, [product.inCart]);
 
     const add = async (product) => {
         if (cartState === CartStatus.OPEN) {
@@ -62,8 +64,8 @@ const Product = ({product}) => {
     };
 
     return (
-        <div key={product.id} className={'group'}>
-            <div className={'p-3 group-hover:shadow rounded-lg'}>
+        <div key={product.id} className={'group pb-4'}>
+            <div className={`p-3 group-hover:shadow rounded-lg ${cartState === CartStatus.UNAVAILABLE && 'opacity-50'}`}>
                 <a href={product.slug}>
                     <div className="w-full aspect-w-1 aspect-h-1 bg-gray-200 rounded-lg overflow-hidden xl:aspect-w-7 xl:aspect-h-8">
                         <img src={product.imgUrl} alt={product.summary} className="w-full h-full object-center object-cover " />
@@ -82,7 +84,7 @@ const Product = ({product}) => {
                         <div className={'text-xs md:text-sm flex justify-start w-full'}>
                             {product.quantity > 0 ? (
                                 product.quantity < 3 ? (
-                                    <span className={'text-green-500 font-light'}>Товар закінчується</span>
+                                    <span className={'text-green-500 font-light'}>Закінчується</span>
                                 ) : (
                                     <span className={'text-green-500 font-light'}>Є в наявності</span>
                                 )
@@ -95,28 +97,5 @@ const Product = ({product}) => {
                 </div>
             </div>
         </div>
-    );
-};
-
-export default function Products(props) {
-    return (
-        <Layout>
-            <div className="bg-white">
-                <div className="mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
-                    {props.error === '404' && (
-                        <div className={'flex justify-center'}>
-                            <h2 className="text-xl  text-gray-900"> Товар не знайдено.</h2>
-                        </div>
-                    )}
-                    <h2 className="text-4xl font-extrabold text-gray-900">{props.category ? props.category.title : 'Усі товари'}</h2>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 ">
-                        {props.products.map((product) => (
-                            <Product key={product.id} product={product} />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </Layout>
     );
 }

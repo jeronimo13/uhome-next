@@ -6,7 +6,7 @@ const reviews = {href: '#', average: 0, totalCount: 0};
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
-export default function Product(props) {
+export default function ProductDetails(props) {
     const productSlug = props.product;
 
     return (

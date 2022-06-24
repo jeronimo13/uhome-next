@@ -14,6 +14,7 @@ const addToCart = async ({productId, showNotification = false}) => {
     });
 
     await queryClient.invalidateQueries(['cart']);
+    await queryClient.invalidateQueries(['products']);
 
     if (showNotification) {
         Store.addNotification({
@@ -40,6 +41,7 @@ const decreaseItemQuantity = async ({productId}) => {
     });
 
     await queryClient.invalidateQueries(['cart']);
+    await queryClient.invalidateQueries(['products']);
 };
 
 const deleteFromCart = async ({productId}) => {
@@ -47,6 +49,7 @@ const deleteFromCart = async ({productId}) => {
         method: 'DELETE',
     });
     await queryClient.invalidateQueries(['cart']);
+    await queryClient.invalidateQueries(['products']);
 };
 
 export {addToCart, deleteFromCart, decreaseItemQuantity};

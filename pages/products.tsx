@@ -1,4 +1,4 @@
-import Products from '../components/Products';
+import ProductList from '../components/list/ProductList';
 import {useQuery} from 'react-query';
 
 export default function ProductsPage(props) {
@@ -11,7 +11,7 @@ export default function ProductsPage(props) {
 
     const {products} = results.data;
     props = {products, ...props};
-    return <Products {...props} />;
+    return <ProductList {...props} />;
 }
 
 export async function getServerSideProps(ctx) {
