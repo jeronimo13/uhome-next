@@ -42,6 +42,9 @@ export async function getCart({userId}) {
                 include: {
                     product: true,
                 },
+                orderBy: {
+                    createdAt: 'asc',
+                },
             },
         },
         update: {},

@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {addToCart} from '../mutations/cart';
+import {addToCart, decreaseItemQuantity} from '../mutations/cart';
 
 const Quantity = (props) => {
     const [quantity, setQuantity] = useState(props.quantity);
@@ -12,6 +12,7 @@ const Quantity = (props) => {
                 `}
                 onClick={async () => {
                     if (quantity > 1) {
+                        await decreaseItemQuantity({productId: props.productId});
                         setQuantity(quantity - 1);
                     }
                 }}

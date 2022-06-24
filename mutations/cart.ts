@@ -2,7 +2,7 @@ import queryClient from './queryClient';
 import {Store} from 'react-notifications-component';
 import message from '../notifications/message';
 
-const addToCart = async ({productId}) => {
+const addToCart = async ({productId, showNotification = false}) => {
     await fetch('/api/cart/add', {
         method: 'POST',
         headers: {
@@ -15,22 +15,38 @@ const addToCart = async ({productId}) => {
 
     await queryClient.invalidateQueries(['cart']);
 
-    Store.addNotification({
-        title: 'Товар додано в кошик',
-        message: message(),
-        type: 'success',
-        container: 'bottom-center',
-        dismiss: {
-            duration: 3000,
+    if (showNotification) {
+        Store.addNotification({
+            title: 'Товар додано в кошик',
+            message: message(),
+            type: 'success',
+            container: 'bottom-center',
+            dismiss: {
+                duration: 3000,
+            },
+        });
+    }
+};
+
+const decreaseItemQuantity = async ({productId}) => {
+    await fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+            productId,
+        }),
     });
+
+    await queryClient.invalidateQueries(['cart']);
 };
 
 const deleteFromCart = async ({productId}) => {
     await fetch(`/api/cart/item/${productId}`, {
         method: 'DELETE',
     });
-    await queryClient.invalidateQueries('cart');
+    await queryClient.invalidateQueries(['cart']);
 };
 
-export {addToCart, deleteFromCart};
+export {addToCart, deleteFromCart, decreaseItemQuantity};
