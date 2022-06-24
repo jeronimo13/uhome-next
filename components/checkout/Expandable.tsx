@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import Bubble from './Bubble';
 
 interface IExpandable {
@@ -8,7 +8,11 @@ interface IExpandable {
     collapsedContent: JSX.Element;
 }
 export default function Expandable(props: IExpandable & any) {
-    const [expanded, setExpanded] = useState<boolean>(props.isExpanded);
+    const [expanded, setExpanded] = useState<boolean>(false);
+
+    useEffect(() => {
+        setExpanded(props.isExpanded);
+    }, [props.isExpanded]);
 
     const trigger = () => {
         setExpanded(!expanded);

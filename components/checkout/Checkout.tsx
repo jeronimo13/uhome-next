@@ -1,10 +1,11 @@
 import {useRouter} from 'next/router';
 import {useMutation, useQuery} from 'react-query';
-import Orders from './Orders';
 import Expandable from './Expandable';
 import Bubble from './Bubble';
 import {formatPriceWithSpaces, pluralizeItems} from '../../utils/utils';
 import {ArrowLeftIcon} from '@heroicons/react/outline';
+import {useState} from 'react';
+import CartItem from '../CartItem';
 
 export default function Checkout() {
     const router = useRouter();
@@ -32,9 +33,13 @@ export default function Checkout() {
         return fetch('/api/cart').then((res) => res.json());
     });
 
+    const [collapsedItems, setCollapsedItems] = useState([false, true, false, false]);
+
     if (results.isLoading) {
         return <div>Loading...</div>;
     }
+
+    console.log(collapsedItems);
 
     const {cart} = results.data;
 
@@ -61,14 +66,55 @@ export default function Checkout() {
             <div className={'md:grid md:grid-cols-3 md:gap-6 mx-2 md:mx-5'}>
                 {/*left*/}
                 <div className={'md:col-span-2 h-full'}>
-                    <Orders orders={cart.items} />
                     <Expandable
+                        isExpanded={collapsedItems[0]}
+                        onTriggerExpanded={(isExpanded) => {
+                            if (isExpanded) {
+                                setCollapsedItems([true, false, false, false]);
+                            } else {
+                                setCollapsedItems([false, true, false, false]);
+                            }
+                        }}
+                        expandedContent={
+                            <div>
+                                <span className={'text-xl'}>Ваше замовлення</span>
+                                <div className={'w-full'}>
+                                    {cart.items.map((order, index) => (
+                                        <CartItem key={order.id} order={order} index={index} />
+                                    ))}
+                                </div>
+                            </div>
+                        }
+                        collapsedContent={
+                            <>
+                                <span className={'text-xl'}>Ваше замовлення</span>
+                                <div className={`flex flex-wrap`}>
+                                    {cart.items.map((order, index) => (
+                                        <div key={index} className={'flex-none m-2'}>
+                                            <img src={order.product.imgUrl} className="rounded w-16 h-16 object-cover" alt={order.product.title} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        }
+                    />
+                    <Expandable
+                        isExpanded={collapsedItems[1]}
+                        onTriggerExpanded={(isExpanded) => {
+                            if (isExpanded) {
+                                setCollapsedItems([false, true, false, false]);
+                            } else {
+                                setCollapsedItems([false, false, true, false]);
+                            }
+                        }}
                         collapsedContent={
                             <>
                                 <span className={'text-xl'}>1. Контактна інформація</span>
-                                <div>
-                                    {cart.phoneNumber} / {cart.lastName} {cart.firstName}
-                                </div>
+                                {cart.phoneNumber && cart.lastName && cart.firstName && (
+                                    <div>
+                                        {cart.phoneNumber} / {cart.lastName} {cart.firstName}
+                                    </div>
+                                )}
                             </>
                         }
                         expandedContent={
@@ -77,33 +123,59 @@ export default function Checkout() {
 
                                 <div className={'py-2'}>
                                     <div>Номер телефону</div>
-                                    <input type={'text'} value={cart.phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+                                    <input
+                                        type={'text'}
+                                        // value={cart.phoneNumber || ''}
+                                        // onChange={(e) => setPhoneNumber(e.target.value)}
+                                    />
                                 </div>
 
                                 <div>
                                     <div>Email</div>
                                     <input
                                         type={'text'}
-                                        value={cart.email}
-                                        onChange={(e) =>
-                                            setCart({
-                                                ...cart,
-                                                email: e.target.value,
-                                            })
-                                        }
+                                        // value={cart.email || ''}
+                                        // onChange={(e) =>
+                                        //     setCart({
+                                        //         ...cart,
+                                        //         email: e.target.value,
+                                        //     })
+                                        // }
                                     />
                                 </div>
                                 <div>
                                     <div>Ім'я</div>
-                                    <input type={'text'} value={cart.firstName} onChange={(e) => setFirstName(e.target.value)} />
+                                    <input
+                                        type={'text'}
+                                        // value={cart.firstName || ''}
+                                        // onChange={(e) => setFirstName(e.target.value)}
+                                    />
 
                                     <div>Прізвище</div>
-                                    <input type={'text'} value={cart.lastName} onChange={(e) => setLastName(e.target.value)} />
+                                    <input
+                                        type={'text'}
+                                        // value={cart.lastName || ''}
+                                        // onChange={(e) => setLastName(e.target.value)}
+                                    />
                                 </div>
                             </>
                         }
                     />
                     <Expandable
+                        isExpanded={collapsedItems[2]}
+                        onTriggerExpanded={(isExpanded) => {
+                            if (isExpanded) {
+                                setCollapsedItems([false, false, true, false]);
+                            } else {
+                                setCollapsedItems([false, false, false, true]);
+                            }
+                        }}
+                        collapsedContent={
+                            <>
+                                <span className={'text-xl'}>2. Cпосіб оплати</span>
+                                <div>Карткою на сайті</div>
+                            </>
+                        }
                         expandedContent={
                             <>
                                 <span className={'text-xl'}>2. Cпосіб оплати</span>
@@ -122,14 +194,24 @@ export default function Checkout() {
                                 </div>
                             </>
                         }
-                        collapsedContent={
-                            <>
-                                <span className={'text-xl'}>2. Cпосіб оплати</span>
-                                <div>Карткою на сайті</div>
-                            </>
-                        }
                     />
                     <Expandable
+                        isExpanded={collapsedItems[3]}
+                        onTriggerExpanded={(isExpanded) => {
+                            if (isExpanded) {
+                                setCollapsedItems([false, false, false, true]);
+                            }
+                        }}
+                        collapsedContent={
+                            <>
+                                <span className={'text-xl'}>3. Доставка</span>
+                                {cart.city && cart.region && cart.street && cart.zipCode && (
+                                    <div>
+                                        {cart.city}, {cart.region} область, {cart.street}, {cart.zipCode}
+                                    </div>
+                                )}
+                            </>
+                        }
                         expandedContent={
                             <>
                                 <span className={'text-xl'}>3. Доставка</span>
@@ -146,14 +228,6 @@ export default function Checkout() {
                                             <div>Кур'єром</div>
                                         </div>
                                     </div>
-                                </div>
-                            </>
-                        }
-                        collapsedContent={
-                            <>
-                                <span className={'text-xl'}>3. Доставка</span>
-                                <div>
-                                    {cart.city}, {cart.region} область, {cart.street}, {cart.zipCode}
                                 </div>
                             </>
                         }
