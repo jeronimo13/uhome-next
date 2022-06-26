@@ -52,4 +52,21 @@ const deleteFromCart = async ({productId}) => {
     await queryClient.invalidateQueries(['products']);
 };
 
-export {addToCart, deleteFromCart, decreaseItemQuantity};
+const updateContactDetails = async ({firstName, lastName, email, phoneNumber, id}) => {
+    console.log(firstName, lastName, email, phoneNumber, id);
+    await fetch(`/api/cart/${id}/contact`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+        }),
+    });
+    await queryClient.invalidateQueries(['cart']);
+};
+
+export {addToCart, deleteFromCart, decreaseItemQuantity, updateContactDetails};

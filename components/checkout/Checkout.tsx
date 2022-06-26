@@ -4,8 +4,11 @@ import Expandable from './Expandable';
 import Bubble from './Bubble';
 import {formatPriceWithSpaces, pluralizeItems} from '../../utils/utils';
 import {ArrowLeftIcon} from '@heroicons/react/outline';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import CartItem from '../CartItem';
+
+import InputMask from 'react-input-mask';
+import {updateContactDetails} from '../../mutations/cart';
 
 export default function Checkout() {
     const router = useRouter();
@@ -34,14 +37,36 @@ export default function Checkout() {
     });
 
     const [collapsedItems, setCollapsedItems] = useState([false, true, false, false]);
+    const [phoneNumber, setPhoneNumber] = useState('+380');
+    const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+
+    const cart = results?.data?.cart;
+
+    useEffect(() => {
+        if (cart) {
+            setPhoneNumber(cart.phoneNumber);
+            setEmail(cart.email);
+            setFirstName(cart.firstName);
+            setLastName(cart.lastName);
+        }
+    }, [cart]);
 
     if (results.isLoading) {
         return <div>Loading...</div>;
     }
 
-    console.log(collapsedItems);
-
-    const {cart} = results.data;
+    const inputClasses = `form-control
+                         block
+                         w-full
+                         bg-clip-padding 
+                         border border-solid border-gray-300
+                         rounded
+                         transition
+                         ease-in-out
+                         m-0
+                         focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none`;
 
     return (
         <div className={'bg-white'}>
@@ -100,10 +125,17 @@ export default function Checkout() {
                     />
                     <Expandable
                         isExpanded={collapsedItems[1]}
-                        onTriggerExpanded={(isExpanded) => {
+                        onTriggerExpanded={async (isExpanded) => {
                             if (isExpanded) {
                                 setCollapsedItems([false, true, false, false]);
                             } else {
+                                await updateContactDetails({
+                                    id: cart.id,
+                                    firstName,
+                                    lastName,
+                                    phoneNumber,
+                                    email,
+                                });
                                 setCollapsedItems([false, false, true, false]);
                             }
                         }}
@@ -118,47 +150,61 @@ export default function Checkout() {
                             </>
                         }
                         expandedContent={
-                            <>
+                            <form>
                                 <span className={'text-xl'}>1. Контактна інформація</span>
 
                                 <div className={'py-2'}>
                                     <div>Номер телефону</div>
-                                    <input
-                                        type={'text'}
-                                        // value={cart.phoneNumber || ''}
-                                        // onChange={(e) => setPhoneNumber(e.target.value)}
-                                    />
+                                    <InputMask
+                                        className={inputClasses}
+                                        mask={'+380 99 999 99 99'}
+                                        onChange={(e) => {
+                                            setPhoneNumber(e.target.value);
+                                        }}
+                                        maskChar={' '}
+                                        alwaysShowMask={true}
+                                        name={'phoneNumber'}
+                                        value={phoneNumber}
+                                    >
+                                        {(inputProps) => <input {...inputProps} name={'phoneNumber'} type={'tel'} />}
+                                    </InputMask>
                                 </div>
 
                                 <div>
                                     <div>Email</div>
                                     <input
-                                        type={'text'}
-                                        // value={cart.email || ''}
-                                        // onChange={(e) =>
-                                        //     setCart({
-                                        //         ...cart,
-                                        //         email: e.target.value,
-                                        //     })
-                                        // }
+                                        type={'email'}
+                                        name={'email'}
+                                        className={inputClasses}
+                                        value={email}
+                                        onChange={(e) => {
+                                            setEmail(e.target.value);
+                                        }}
+                                        placeholder={'Введіть email'}
                                     />
                                 </div>
                                 <div>
                                     <div>Ім'я</div>
                                     <input
                                         type={'text'}
-                                        // value={cart.firstName || ''}
-                                        // onChange={(e) => setFirstName(e.target.value)}
+                                        name={'firstName'}
+                                        className={inputClasses}
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        placeholder={'Степан'}
                                     />
 
                                     <div>Прізвище</div>
                                     <input
                                         type={'text'}
-                                        // value={cart.lastName || ''}
-                                        // onChange={(e) => setLastName(e.target.value)}
+                                        name={'lastName'}
+                                        className={inputClasses}
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        placeholder={'Бандера'}
                                     />
                                 </div>
-                            </>
+                            </form>
                         }
                     />
                     <Expandable

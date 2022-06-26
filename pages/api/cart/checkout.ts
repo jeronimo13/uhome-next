@@ -5,8 +5,6 @@ export default async function handler(req, res) {
     const session = await getSession({req});
     const {cartId} = req.body;
 
-    console.log(cartId);
-
     const cart = await prisma.cart.findUnique({
         where: {
             id: cartId,

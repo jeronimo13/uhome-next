@@ -22,7 +22,7 @@ export default function Expandable(props: IExpandable & any) {
     return (
         <Bubble classes={expanded ? 'bg-white' : 'text-gray-600'}>
             <div>{expanded ? props.expandedContent : props.collapsedContent}</div>
-            <div className={'text-center mt-2'}>
+            <div className={'text-center mt-4'}>
                 {expanded ? (
                     <button className={'bg-indigo-600 p-3 rounded text-white w-64'} onClick={trigger}>
                         Продовжити замовлення
