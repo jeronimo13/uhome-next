@@ -64,8 +64,9 @@ export default function Product({product}) {
     };
 
     return (
-        <div key={product.id} className={'group pb-4'}>
-            <div className={`p-3 group-hover:shadow rounded-lg ${cartState === CartStatus.UNAVAILABLE && 'opacity-50'}`}>
+        <div key={product.id} className={'group'}>
+            <div className={`px-4 pt-4 pb-6 group-hover:shadow rounded-lg ${cartState === CartStatus.UNAVAILABLE && 'opacity-50'}`}>
+                <div className={'w-full text-right text-xs font-light text-slate-300 mb-4'}>Код: {product.code}</div>
                 <a href={product.slug}>
                     <div className="w-full aspect-w-1 aspect-h-1 bg-gray-200 rounded-lg overflow-hidden xl:aspect-w-7 xl:aspect-h-8">
                         <img src={product.imgUrl} alt={product.summary} className="w-full h-full object-center object-cover " />
@@ -79,7 +80,7 @@ export default function Product({product}) {
                 </div>
                 <div className={'flex justify-between'}>
                     <div className={' pl-2'}>
-                        <p className="mt-1 text-md md:text-lg font-medium text-gray-900">{product.price}₴</p>
+                        <p className="mt-1 text-md md:text-2xl font-medium text-gray-900 mb-2">{product.price}₴</p>
 
                         <div className={'text-xs md:text-sm flex justify-start w-full'}>
                             {product.quantity > 0 ? (
