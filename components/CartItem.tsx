@@ -23,9 +23,9 @@ export interface Order {
 
 const CartItem = ({order, index}: {order: Order; index: number}) => {
     return (
-        <div className={`py-5 mx-2 flex items-center ${index > 0 && `border-t-2`}`}>
-            <div className={'w-32 flex-none'}>
-                <img src={order.product.imgUrl} className="rounded w-32 h-32 object-cover" alt={order.product.title} />
+        <div className={`py-5 flex items-top ${index > 0 && `border-t-2`}`}>
+            <div className={'flex-none'}>
+                <img src={order.product.imgUrl} className="rounded w-24 h-24 object-cover" alt={order.product.title} />
             </div>
             <div className={'pl-5 w-full'}>
                 <div className={'min-w-fit pr-5'}>

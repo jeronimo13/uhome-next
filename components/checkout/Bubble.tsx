@@ -1,3 +1,14 @@
 export default function Bubble(props) {
-    return <div className={`${props.classes} rounded-xl border shadow-lg p-5 mt-5`}>{props.children}</div>;
+    return (
+        <div
+            className={`${props.classes} rounded-lg border shadow-lg
+    px-4 py-6 
+    mt-6 
+    sm:p-6
+    lg:p-10
+    `}
+        >
+            {props.children}
+        </div>
+    );
 }
