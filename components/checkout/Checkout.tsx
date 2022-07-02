@@ -4,11 +4,12 @@ import Expandable from './Expandable';
 import Bubble from './Bubble';
 import {formatPriceWithSpaces, pluralizeItems} from '../../utils/utils';
 import {ArrowLeftIcon} from '@heroicons/react/outline';
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import CartItem from '../CartItem';
 
 import InputMask from 'react-input-mask';
 import {updateContactDetails} from '../../mutations/cart';
+import {useForm, Controller} from 'react-hook-form';
 
 export default function Checkout() {
     const router = useRouter();
@@ -37,19 +38,44 @@ export default function Checkout() {
     });
 
     const [collapsedItems, setCollapsedItems] = useState([false, true, false, false]);
-    const [phoneNumber, setPhoneNumber] = useState('+380');
-    const [email, setEmail] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
 
     const cart = results?.data?.cart;
 
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: {errors},
+        setValue,
+        control,
+    } = useForm({
+        defaultValues: {
+            phoneNumber: '+380',
+            email: '',
+            firstName: '',
+            lastName: '',
+        },
+    });
+
+    const onSubmit = async (data) => {
+        await updateContactDetails({
+            id: cart.id,
+            ...data,
+        });
+
+        if (Object.keys(errors).length === 0) {
+            setCollapsedItems([false, false, true, false]);
+        }
+    };
+
+    const contracts = useRef(null);
+
     useEffect(() => {
         if (cart) {
-            setPhoneNumber(cart.phoneNumber);
-            setEmail(cart.email);
-            setFirstName(cart.firstName);
-            setLastName(cart.lastName);
+            setValue('phoneNumber', cart.phoneNumber);
+            setValue('email', cart.email);
+            setValue('firstName', cart.firstName);
+            setValue('lastName', cart.lastName);
         }
     }, [cart]);
 
@@ -128,18 +154,11 @@ export default function Checkout() {
                             />
                             <Expandable
                                 isExpanded={collapsedItems[1]}
-                                onTriggerExpanded={async (isExpanded) => {
+                                onTriggerExpanded={(isExpanded) => {
                                     if (isExpanded) {
                                         setCollapsedItems([false, true, false, false]);
                                     } else {
-                                        await updateContactDetails({
-                                            id: cart.id,
-                                            firstName,
-                                            lastName,
-                                            phoneNumber,
-                                            email,
-                                        });
-                                        setCollapsedItems([false, false, true, false]);
+                                        contracts.current.click();
                                     }
                                 }}
                                 collapsedContent={
@@ -153,63 +172,75 @@ export default function Checkout() {
                                     </>
                                 }
                                 expandedContent={
-                                    <form>
+                                    <form onSubmit={handleSubmit(onSubmit)}>
                                         <span className={'text-xl'}>1. Контактна інформація</span>
 
-                                        <div className={'py-2'}>
-                                            <div>Номер телефону</div>
-                                            <InputMask
-                                                className={inputClasses}
-                                                mask={'+380 99 999 99 99'}
-                                                onChange={(e) => {
-                                                    setPhoneNumber(e.target.value);
-                                                }}
-                                                maskChar={' '}
-                                                alwaysShowMask={true}
-                                                name={'phoneNumber'}
-                                                value={phoneNumber}
-                                            >
-                                                {(inputProps) => <input {...inputProps} name={'phoneNumber'} type={'tel'} />}
-                                            </InputMask>
-                                        </div>
+                                        <div className={'flex pt-2'}>
+                                            <div className={'flex-1 mr-5'}>
+                                                <div>Номер телефону</div>
+                                                <Controller
+                                                    control={control}
+                                                    name="phoneNumber"
+                                                    defaultValue={'+380'}
+                                                    render={({field}) => {
+                                                        return (
+                                                            <InputMask
+                                                                className={inputClasses}
+                                                                mask={'+380 99 999 99 99'}
+                                                                onChange={(e) => {
+                                                                    field.onChange(e.target.value);
+                                                                }}
+                                                                maskChar={' '}
+                                                                alwaysShowMask={true}
+                                                                name={'phoneNumber'}
+                                                                value={field.value}
+                                                            >
+                                                                {(inputProps) => <input {...inputProps} name={'phoneNumber'} type={'tel'} />}
+                                                            </InputMask>
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
 
-                                        <div>
-                                            <div>Email</div>
-                                            <input
-                                                type={'email'}
-                                                name={'email'}
-                                                className={inputClasses}
-                                                value={email}
-                                                onChange={(e) => {
-                                                    setEmail(e.target.value);
-                                                }}
-                                                placeholder={'Введіть email'}
-                                            />
+                                            <div className={'flex-1'}>
+                                                <div>Імейл</div>
+                                                <input
+                                                    type={'email'}
+                                                    name={'email'}
+                                                    className={inputClasses}
+                                                    {...register('email', {required: 'Введіть електронну адресу'})}
+                                                    placeholder={'Введіть email'}
+                                                />
+                                                <div className={'text-red-500'}>{errors.email?.message}</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div>Ім'я</div>
-                                            <input
-                                                type={'text'}
-                                                name={'firstName'}
-                                                className={inputClasses}
-                                                value={firstName}
-                                                onChange={(e) => setFirstName(e.target.value)}
-                                                placeholder={'Степан'}
-                                            />
-
+                                        <div className={'pt-2'}>
                                             <div>Прізвище</div>
                                             <input
                                                 type={'text'}
                                                 name={'lastName'}
                                                 className={inputClasses}
-                                                value={lastName}
-                                                onChange={(e) => setLastName(e.target.value)}
                                                 placeholder={'Бандера'}
+                                                {...register('lastName', {required: 'Введіть прізвище'})}
                                             />
+                                            <div className={'text-red-500'}>{errors.lastName?.message}</div>
                                         </div>
+                                        <div className={'pt-2'}>
+                                            <div>Ім'я</div>
+                                            <input
+                                                type={'text'}
+                                                name={'firstName'}
+                                                className={inputClasses}
+                                                {...register('firstName', {required: "Введіть ім'я"})}
+                                                placeholder={'Степан'}
+                                            />
+                                            <div className={'text-red-500'}>{errors.firstName?.message}</div>
+                                        </div>
+                                        <input type={'submit'} className={'hidden'} ref={contracts} />
                                     </form>
                                 }
                             />
+
                             <Expandable
                                 isExpanded={collapsedItems[2]}
                                 onTriggerExpanded={(isExpanded) => {
@@ -221,23 +252,28 @@ export default function Checkout() {
                                 }}
                                 collapsedContent={
                                     <>
-                                        <span className={'text-xl'}>2. Cпосіб оплати</span>
-                                        <div>Карткою на сайті</div>
+                                        <span className={'text-xl'}>2. Доставка</span>
+                                        {cart.city && cart.region && cart.street && cart.zipCode && (
+                                            <div>
+                                                {cart.city}, {cart.region} область, {cart.street}, {cart.zipCode}
+                                            </div>
+                                        )}
                                     </>
                                 }
                                 expandedContent={
                                     <>
-                                        <span className={'text-xl'}>2. Cпосіб оплати</span>
+                                        <span className={'text-xl'}>2. Доставка</span>
+
                                         <div>
-                                            <div>Спосіб оплати</div>
+                                            <div>Спосіб доставки</div>
                                             <div className={'flex'}>
                                                 <div className={'flex-1'}>
-                                                    <input className={'border-2 p-2'} type={'radio'} name={'payment'} value={'cash'} />
-                                                    <div>Готівкою</div>
+                                                    <input className={'border-2 p-2'} type={'radio'} name={'delivery'} value={'self'} />
+                                                    <div>Самовивіз</div>
                                                 </div>
                                                 <div className={'flex-1'}>
-                                                    <input className={'border-2 p-2'} type={'radio'} name={'payment'} value={'card'} />
-                                                    <div>Карткою</div>
+                                                    <input className={'border-2 p-2'} type={'radio'} name={'delivery'} value={'courier'} />
+                                                    <div>Кур'єром</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -253,28 +289,23 @@ export default function Checkout() {
                                 }}
                                 collapsedContent={
                                     <>
-                                        <span className={'text-xl'}>3. Доставка</span>
-                                        {cart.city && cart.region && cart.street && cart.zipCode && (
-                                            <div>
-                                                {cart.city}, {cart.region} область, {cart.street}, {cart.zipCode}
-                                            </div>
-                                        )}
+                                        <span className={'text-xl'}>3. Спосіб оплати</span>
+                                        <div>Карткою на сайті</div>
                                     </>
                                 }
                                 expandedContent={
                                     <>
-                                        <span className={'text-xl'}>3. Доставка</span>
-
+                                        <span className={'text-xl'}>3. Спосіб оплати</span>
                                         <div>
-                                            <div>Спосіб доставки</div>
+                                            <div>Спосіб оплати</div>
                                             <div className={'flex'}>
                                                 <div className={'flex-1'}>
-                                                    <input className={'border-2 p-2'} type={'radio'} name={'delivery'} value={'self'} />
-                                                    <div>Самовивіз</div>
+                                                    <input className={'border-2 p-2'} type={'radio'} name={'payment'} value={'cash'} />
+                                                    <div>Готівкою</div>
                                                 </div>
                                                 <div className={'flex-1'}>
-                                                    <input className={'border-2 p-2'} type={'radio'} name={'delivery'} value={'courier'} />
-                                                    <div>Кур'єром</div>
+                                                    <input className={'border-2 p-2'} type={'radio'} name={'payment'} value={'card'} />
+                                                    <div>Карткою</div>
                                                 </div>
                                             </div>
                                         </div>

@@ -15,7 +15,7 @@ export default function Expandable(props: IExpandable & any) {
     }, [props.isExpanded]);
 
     const trigger = () => {
-        setExpanded(!expanded);
+        // setExpanded(!expanded);
         props.onTriggerExpanded && props.onTriggerExpanded(!expanded);
     };
 
