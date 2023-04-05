@@ -10,6 +10,7 @@ import CartItem from '../CartItem';
 import InputMask from 'react-input-mask';
 import {updateContactDetails} from '../../mutations/cart';
 import {useForm, Controller} from 'react-hook-form';
+import Select from 'react-select';
 
 export default function Checkout() {
     const router = useRouter();
@@ -37,7 +38,7 @@ export default function Checkout() {
         return fetch('/api/cart').then((res) => res.json());
     });
 
-    const [collapsedItems, setCollapsedItems] = useState([false, true, false, false]);
+    const [collapsedItems, setCollapsedItems] = useState([false, false, true, false]);
 
     const cart = results?.data?.cart;
 
@@ -268,12 +269,13 @@ export default function Checkout() {
                                             <div>Спосіб доставки</div>
                                             <div className={'flex'}>
                                                 <div className={'flex-1'}>
-                                                    <input className={'border-2 p-2'} type={'radio'} name={'delivery'} value={'self'} />
-                                                    <div>Самовивіз</div>
-                                                </div>
-                                                <div className={'flex-1'}>
-                                                    <input className={'border-2 p-2'} type={'radio'} name={'delivery'} value={'courier'} />
-                                                    <div>Кур'єром</div>
+                                                    <Select
+                                                        options={[
+                                                            {value: 'Самовивіз', label: 'Самовивіз'},
+                                                            {value: 'Нова пошта', label: 'Нова пошта'},
+                                                            {value: 'Укрпошта', label: 'Укрпошта'},
+                                                        ]}
+                                                    />
                                                 </div>
                                             </div>
                                         </div>

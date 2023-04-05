@@ -23,7 +23,8 @@
     "react-hook-form": "^7.33.1",
     "react-input-mask": "^2.0.4",
     "react-notifications-component": "^4.0.1",
-    "react-query": "^3.39.1"
+    "react-query": "^3.39.1",
+    "react-select": "^5.4.0"
   },
   "devDependencies": {
     "@heroicons/react": "^1.0.6",
